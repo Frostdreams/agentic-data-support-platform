@@ -1,0 +1,14 @@
+from pydantic import AwareDatetime, BaseModel, EmailStr
+
+class IncidentCreate(BaseModel):
+    ticket_name: str  # short human readable title of the incident
+    description: str  # what is the problem, what is the expected vs actual behavior
+    reporter_email: EmailStr  # email of the BI team member that sent this ticket
+
+    report_name: str  # what report/dashboard is displaying the discrepancy
+    snowflake_object: str  # what is the snowflake table or view that feeds data into the report
+    affected_fields: list[str]  # what field(s) are showing the data discrepancy in the table
+    symptom: str  # category of discrepancy, such as incorrect, missing,stale, or duplicated
+    timeframe_start: AwareDatetime  # beginning of affected period
+    timeframe_end: AwareDatetime # end of affected period
+    message_id: str | None = None # optional representative message or correlation ID
