@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -21,9 +22,16 @@ def test_create_incident():
     incident_data = valid_incident_data()
 
     response = client.post("/incidents",json=incident_data)
+    response_data = response.json()
 
-    assert response.status_code == 200
-    assert response.json() == incident_data
+    assert response.status_code == 201
+
+    for field,value in incident_data.items():
+        assert response_data[field] == value
+        
+    assert UUID(response_data["incident_id"])
+    assert response_data["status"] == "new"
+    assert response_data["created_at"]
 
 def test_create_incident_missing_fields():
     incident_data = valid_incident_data()

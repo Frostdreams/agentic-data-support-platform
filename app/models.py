@@ -1,3 +1,5 @@
+from enum import Enum
+from uuid import UUID
 from pydantic import AwareDatetime, BaseModel, EmailStr
 
 class IncidentCreate(BaseModel):
@@ -12,3 +14,16 @@ class IncidentCreate(BaseModel):
     timeframe_start: AwareDatetime  # beginning of affected period
     timeframe_end: AwareDatetime # end of affected period
     message_id: str | None = None # optional representative message or correlation ID
+
+class IncidentStatus(str, Enum):
+    NEW = "new"
+    DIAGNOSING = "diagnosing"
+    AWAITING_APPROVAL = "awaiting_approval"
+    RESOLVED = "resolved"
+    ESCALATED = "escalated"
+
+
+class Incident(IncidentCreate):
+    incident_id: UUID
+    status: IncidentStatus
+    created_at: AwareDatetime
