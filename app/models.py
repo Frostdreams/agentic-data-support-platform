@@ -22,6 +22,29 @@ class IncidentStatus(str, Enum):
     RESOLVED = "resolved"
     ESCALATED = "escalated"
 
+class SystemType(str, Enum):
+    KAFKA = "kafka"
+    EKS = "eks"
+    MONGODB = "mongodb"
+    S3 = "s3"
+    AIRFLOW = "airflow"
+    SNOWFLAKE = "snowflake"
+    AWS_BATCH = "aws_batch"
+    AWS_LAMBDA = "aws_lambda"
+
+# represents stage in pipeline
+class LineageStage(BaseModel):
+    system_type: SystemType  # see SystemType class 
+    resource_id: str  # actual topic, bucket path, collection etc
+    description: str  
+
+class PipelineLineage(BaseModel):
+    pipeline_id: str 
+    stages: list[LineageStage]
+
+class LineageResult(BaseModel):
+    snowflake_object: str 
+    pipelines: list[PipelineLineage]
 
 class Incident(IncidentCreate):
     incident_id: UUID

@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -28,7 +28,7 @@ def test_create_incident():
 
     for field,value in incident_data.items():
         assert response_data[field] == value
-        
+
     assert UUID(response_data["incident_id"])
     assert response_data["status"] == "new"
     assert response_data["created_at"]
@@ -63,4 +63,32 @@ def test_create_incident_rejects_datetime_without_timezone():
     assert response.json()["detail"][0]["loc"] == [
         "body",
         "timeframe_start",
+    ]
+
+def test_get_incident():
+    incident_data = valid_incident_data()
+    post_response = client.post("/incidents",json=incident_data)
+    assert post_response.status_code == 201
+    post_response_data = post_response.json()
+    incident_id = post_response_data["incident_id"]
+
+    get_response = client.get("/incidents/" + incident_id)
+    assert get_response.status_code == 200
+    assert get_response.json() == post_response_data
+
+# case where UUID is valid but entry does not exist
+def test_get_incident_not_found():
+    incident_id = uuid4()
+    get_response = client.get("/incidents/" + str(incident_id))
+    assert get_response.status_code == 404
+    assert get_response.json()["detail"] == "Incident not found"
+
+# case where UUID is invalid
+def test_get_incident_rejects_invalid_uuid():
+    incident_id = "abcdefghijk"
+    get_response = client.get("/incidents/" + incident_id)
+    assert get_response.status_code == 422
+    assert get_response.json()["detail"][0]["loc"] == [
+        "path",
+        "incident_id",
     ]
